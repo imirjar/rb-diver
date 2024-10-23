@@ -1,0 +1,3 @@
+michman: "localhost:9090"
+secret: "haslo"
+db: "postgres://postgres:postgres@localhost:5432/praktikum?sslmode=disable"
