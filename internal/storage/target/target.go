@@ -2,8 +2,10 @@ package target
 
 import (
 	"context"
-	"database/sql"
+	"log"
 
+	"github.com/imirjar/rb-diver/internal/models"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -12,47 +14,46 @@ type Config interface {
 }
 
 type TargetDB struct {
-	pool *sql.DB
+	pool *pgxpool.Pool
 }
 
-func New(dbconn string) *TargetDB {
-	pool, err := sql.Open("pgx", dbconn)
-	if err != nil {
-		panic(err)
-	}
-	return &TargetDB{
-		pool: pool,
-	}
-}
-
-func (t *TargetDB) ExecuteQuery(ctx context.Context, query string) ([]map[string]any, error) {
-	rows, err := t.pool.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-
-	columns, err := rows.Columns()
-	if err != nil {
-		return nil, err
-	}
-
-	var allMaps []map[string]any
-	for rows.Next() {
-		values := make([]interface{}, len(columns))
-		pointers := make([]interface{}, len(columns))
-		for i := range values {
-			pointers[i] = &values[i]
-		}
-		err = rows.Scan(pointers...)
+func New(ctx context.Context, dbConn string) *TargetDB {
+	if ping(dbConn) {
+		pool, err := pgxpool.New(ctx, dbConn)
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
-		resultMap := make(map[string]interface{})
-		for i, val := range values {
-			resultMap[columns[i]] = val
+		return &TargetDB{
+			pool: pool,
 		}
-		allMaps = append(allMaps, resultMap)
+	} else {
+		panic("AHTUNG!!!")
 	}
 
-	return allMaps, nil
+}
+
+func (t *TargetDB) ExecuteQuery(ctx context.Context, query string) (*models.Data, error) {
+	var data models.Data
+	err := t.pool.QueryRow(ctx, query).Scan(&data.Raw)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	return &data, nil
+}
+
+func ping(conn string) bool {
+	ctx := context.Background()
+	pool, err := pgxpool.New(ctx, conn)
+	if err != nil {
+		log.Print(err.Error())
+		return false
+	}
+	if err = pool.Ping(ctx); err != nil {
+		log.Println("Внимание! Подключение к базе данных отсутствует!")
+		return false
+	} else {
+		return true
+	}
 }

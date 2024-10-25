@@ -6,11 +6,12 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/imirjar/rb-diver/internal/service"
 )
 
 type Service interface {
-	Execute(ctx context.Context, id string) (string, error)
+	Execute(ctx context.Context, id string) (*models.Data, error)
 	ReportsList(ctx context.Context) (string, error)
 }
 
@@ -35,9 +36,11 @@ func (a *HTTP) Start(ctx context.Context, addr string) error {
 
 	// router.Use(middleware.Encryptor(a.config.GetSecret()))
 
+	router.Get("/", a.Info)
+
 	router.Route("/reports", func(update chi.Router) {
-		update.Post("/execute/", a.ExecuteHandler)
-		update.Post("/list/", a.ReportsListHandler)
+		update.Get("/", a.ReportsList)
+		update.Get("/generate/{id}", a.GenerateReport)
 	})
 
 	//for new usecases add new route

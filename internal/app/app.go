@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"log"
 
 	"github.com/imirjar/rb-diver/internal/gateway/http"
 	"github.com/imirjar/rb-diver/internal/service"
@@ -15,7 +16,7 @@ func Run(ctx context.Context) error {
 	cfg := config.New()
 
 	// Create storage layer for data
-	storage := storage.New(cfg.Michman)
+	storage := storage.New(cfg.DB)
 
 	// Create service layer for app logic
 	service := service.New()
@@ -28,9 +29,11 @@ func Run(ctx context.Context) error {
 	// Waiting for srv.Start's ending
 	done := make(chan bool)
 	go func() {
-		srv.Start(ctx, cfg.Michman)
+		srv.Start(ctx, cfg.Addr)
+		log.Print("done")
 		done <- true
 	}()
+
 	<-done
 
 	return nil

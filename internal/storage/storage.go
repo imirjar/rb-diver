@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 
+	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/imirjar/rb-diver/internal/storage/reports"
 	"github.com/imirjar/rb-diver/internal/storage/target"
 )
@@ -17,7 +18,7 @@ type ReportsStore interface {
 }
 
 type Target interface {
-	ExecuteQuery(ctx context.Context, query string) ([]map[string]any, error)
+	ExecuteQuery(ctx context.Context, query string) (*models.Data, error)
 }
 
 type Storage struct {
@@ -28,6 +29,6 @@ type Storage struct {
 func New(conn string) *Storage {
 	return &Storage{
 		ReportsStore: reports.New(),
-		Target:       target.New(conn),
+		Target:       target.New(context.Background(), conn),
 	}
 }

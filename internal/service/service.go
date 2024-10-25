@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
-	"encoding/json"
+	"log"
+
+	"github.com/imirjar/rb-diver/internal/models"
 )
 
 type Service struct {
@@ -11,7 +13,7 @@ type Service struct {
 
 type Storage interface {
 	GetQuery(context.Context, string) (string, error)
-	ExecuteQuery(context.Context, string) ([]map[string]any, error)
+	ExecuteQuery(context.Context, string) (*models.Data, error)
 	GetAllReports(ctx context.Context) (string, error)
 }
 
@@ -19,23 +21,21 @@ func New() *Service {
 	return &Service{}
 }
 
-func (s Service) Execute(ctx context.Context, id string) (string, error) {
-	report, err := s.Storage.GetQuery(ctx, id)
+func (s Service) Execute(ctx context.Context, id string) (*models.Data, error) {
+	query, err := s.Storage.GetQuery(ctx, id)
 	if err != nil {
-		return "", err
+		log.Print("GET QUERY ERROR:", err)
+		return nil, err
 	}
 
-	data, err := s.Storage.ExecuteQuery(ctx, report)
+	data, err := s.Storage.ExecuteQuery(ctx, query)
 	if err != nil {
-		return "", err
+		log.Print("EXECUTE QUERY ERROR:", err)
+		return nil, err
 	}
 
-	m, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-
-	return string(m), nil
+	log.Println(query, string(data.Raw))
+	return data, nil
 }
 
 func (s Service) ReportsList(ctx context.Context) (string, error) {

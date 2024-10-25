@@ -35,9 +35,9 @@ func New() *ReportsStore {
 		dbConn: conn,
 	}
 
-	if err := store.Ping(); err != nil {
-		panic(err)
-	}
+	// if err := store.Ping(); err != nil {
+	// 	panic(err)
+	// }
 
 	return &store
 }
