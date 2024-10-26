@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 
-	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/imirjar/rb-diver/internal/storage/reports"
 	"github.com/imirjar/rb-diver/internal/storage/target"
 )
@@ -18,7 +17,7 @@ type ReportsStore interface {
 }
 
 type Target interface {
-	ExecuteQuery(ctx context.Context, query string) (*models.Data, error)
+	ExecuteQuery(ctx context.Context, query string) ([]map[string]interface{}, error)
 }
 
 type Storage struct {

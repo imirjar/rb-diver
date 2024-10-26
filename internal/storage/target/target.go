@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -32,15 +31,37 @@ func New(ctx context.Context, dbConn string) *TargetDB {
 
 }
 
-func (t *TargetDB) ExecuteQuery(ctx context.Context, query string) (*models.Data, error) {
-	var data models.Data
-	err := t.pool.QueryRow(ctx, query).Scan(&data.Raw)
+func (t *TargetDB) ExecuteQuery(ctx context.Context, query string) ([]map[string]interface{}, error) {
+
+	rows, err := t.pool.Query(ctx, query)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 
-	return &data, nil
+	// Получаем имена колонок
+	fieldDescriptions := rows.FieldDescriptions()
+	columns := make([]string, len(fieldDescriptions))
+	for i, fd := range fieldDescriptions {
+		columns[i] = string(fd.Name)
+	}
+
+	var results []map[string]interface{}
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			return nil, err
+		}
+
+		// Создаем динамическую запись
+		record := make(map[string]interface{})
+		for i, col := range columns {
+			record[col] = values[i]
+		}
+		results = append(results, record)
+	}
+	log.Print(results)
+	return results, nil
 }
 
 func ping(conn string) bool {

@@ -10,5 +10,5 @@ type Report struct {
 }
 
 type Data struct {
-	Raw json.RawMessage
+	Raw []json.RawMessage
 }

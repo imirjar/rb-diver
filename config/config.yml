@@ -1,3 +1,3 @@
 addr: "localhost:9090"
 secret: "haslo"
-db: "postgres://postgres:postgres@localhost:5432/praktikum?sslmode=disable"
+db: "postgres://postgres:postgres@localhost:5432/divers_target?sslmode=disable"

@@ -6,12 +6,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/imirjar/rb-diver/internal/service"
 )
 
 type Service interface {
-	Execute(ctx context.Context, id string) (*models.Data, error)
+	Execute(ctx context.Context, id string) ([]map[string]interface{}, error)
 	ReportsList(ctx context.Context) (string, error)
 }
 
