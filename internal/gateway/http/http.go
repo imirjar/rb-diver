@@ -15,6 +15,7 @@ type Service interface {
 }
 
 type HTTP struct {
+	client  *client
 	Service Service
 }
 
@@ -26,20 +27,23 @@ type Config interface {
 
 func New() *HTTP {
 	return &HTTP{
+		client:  &client{http.DefaultClient},
 		Service: service.New(),
 	}
 }
 
-func (a *HTTP) Start(ctx context.Context, addr string) error {
+func (gw *HTTP) Start(ctx context.Context, addr string, michman string) error {
 	router := chi.NewRouter()
 
-	// router.Use(middleware.Encryptor(a.config.GetSecret()))
+	// if michman != "" {
+	// 	router.Use(trusted.Middleware(michman))
+	// }
 
-	router.Get("/", a.Info)
+	router.Get("/", gw.Info)
 
 	router.Route("/reports", func(update chi.Router) {
-		update.Get("/", a.ReportsList)
-		update.Get("/generate/{id}", a.GenerateReport)
+		update.Get("/", gw.ReportsList)
+		update.Get("/generate/{id}", gw.GenerateReport)
 	})
 
 	//for new usecases add new route
@@ -50,4 +54,21 @@ func (a *HTTP) Start(ctx context.Context, addr string) error {
 
 	log.Printf("Run app on PORT %s", addr)
 	return srv.ListenAndServe()
+}
+
+func (gw *HTTP) Registrate(ctx context.Context, addr string) error {
+	log.Print("Michman!!! I'm here! Under the water!")
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://"+addr+"/connect", nil)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	req.Header.Add("X-Real-IP", addr)
+	status, err := gw.client.POST(req)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	log.Print(status)
+	return nil
 }

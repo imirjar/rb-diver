@@ -44,3 +44,8 @@ func (a *HTTP) Info(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Hello! I,m a diver."))
 }
+
+func (a *HTTP) CheckConnection(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("I'm here yet!"))
+}

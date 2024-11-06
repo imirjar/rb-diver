@@ -29,12 +29,18 @@ func Run(ctx context.Context) error {
 	// Waiting for srv.Start's ending
 	done := make(chan bool)
 	go func() {
-		srv.Start(ctx, cfg.Addr)
-		log.Print("done")
+		// registration in Michman
+		err := srv.Registrate(ctx, cfg.Michman)
+		if err != nil {
+			log.Print(err)
+			done <- true
+		}
+
+		// Start HTTP server
+		srv.Start(ctx, cfg.Addr, cfg.Michman)
 		done <- true
 	}()
 
 	<-done
-
 	return nil
 }

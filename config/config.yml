@@ -1,3 +1,4 @@
-addr: "localhost:9090"
+michman: "0.0.0.0:9090"
+addr: "127.0.0.1:8080"
 secret: "haslo"
 db: "postgres://postgres:postgres@localhost:5432/divers_target?sslmode=disable"

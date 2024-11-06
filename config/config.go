@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	Addr   string `yaml:"addr" env:"ADDR"`
-	Secret string `yaml:"secret" env:"SECRET"`
-	DB     string `yaml:"db" env:"DB"`
+	Michman string `yaml:"michman" env:"MICHMAN"`
+	Addr    string `yaml:"addr" env:"ADDR"`
+	Secret  string `yaml:"secret" env:"SECRET"`
+	DB      string `yaml:"db" env:"DB"`
 }
 
 func New() *Config {
