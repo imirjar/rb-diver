@@ -1,0 +1,8 @@
+# config files
+.env
+
+# keys
+/keys
+
+# binaries
+/bin
