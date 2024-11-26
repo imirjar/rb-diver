@@ -37,7 +37,11 @@ func Run(ctx context.Context) error {
 		}
 
 		// Start HTTP server
-		srv.Start(ctx, cfg.Addr, cfg.Michman)
+		err = srv.Start(ctx, cfg.Port, cfg.Michman)
+		if err != nil {
+			panic(err)
+		}
+
 		done <- true
 	}()
 

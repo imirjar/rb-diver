@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	Michman string `yaml:"michman" env:"MICHMAN"`
-	Addr    string `yaml:"addr" env:"ADDR"`
+	Port    string `yaml:"port" env:"PORT"`
 	Secret  string `yaml:"secret" env:"SECRET"`
 	DB      string `yaml:"db" env:"DB"`
 }

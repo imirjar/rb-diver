@@ -26,7 +26,8 @@ func New(ctx context.Context, dbConn string) *TargetDB {
 			pool: pool,
 		}
 	} else {
-		panic("AHTUNG!!!")
+		log.Print(dbConn)
+		panic("YOU CAN'T RUN DIVER WITHOUT DB CONNECTION!!!")
 	}
 
 }

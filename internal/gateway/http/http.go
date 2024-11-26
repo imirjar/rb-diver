@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -48,7 +49,7 @@ func (gw *HTTP) Start(ctx context.Context, addr string, michman string) error {
 
 	//for new usecases add new route
 	srv := &http.Server{
-		Addr:    addr,
+		Addr:    fmt.Sprintf(":%s", addr),
 		Handler: router,
 	}
 
