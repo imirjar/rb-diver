@@ -28,7 +28,6 @@ func (a *HTTP) GenerateReport(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *HTTP) ReportsList(w http.ResponseWriter, r *http.Request) {
-
 	result, err := a.Service.ReportsList(r.Context())
 	if err != nil {
 		log.Println("HANDLER ExecuteHandler Encode ERROR", err)

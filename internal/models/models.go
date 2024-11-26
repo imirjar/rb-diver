@@ -6,3 +6,8 @@ type Report struct {
 	Query string `json:"query,omitempty"`
 	Data  string `json:"data,omitempty"`
 }
+
+type Diver struct {
+	Name string
+	IP   string
+}

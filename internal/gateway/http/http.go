@@ -1,12 +1,15 @@
 package http
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/imirjar/rb-diver/internal/service"
 )
 
@@ -20,12 +23,6 @@ type HTTP struct {
 	Service Service
 }
 
-type Config interface {
-	GetDiverAddr() string
-	GetMichmanAddr() string //allow req only for this addr
-	GetSecret() string
-}
-
 func New() *HTTP {
 	return &HTTP{
 		client:  &client{http.DefaultClient},
@@ -35,10 +32,6 @@ func New() *HTTP {
 
 func (gw *HTTP) Start(ctx context.Context, addr string, michman string) error {
 	router := chi.NewRouter()
-
-	// if michman != "" {
-	// 	router.Use(trusted.Middleware(michman))
-	// }
 
 	router.Get("/", gw.Info)
 
@@ -59,7 +52,20 @@ func (gw *HTTP) Start(ctx context.Context, addr string, michman string) error {
 
 func (gw *HTTP) Registrate(ctx context.Context, addr string) error {
 	log.Print("Michman!!! I'm here! Under the water!")
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://"+addr+"/connect", nil)
+
+	diver := models.Diver{
+		Name: "MyMac",
+		IP:   "192.168.0.1",
+	}
+
+	md, err := json.Marshal(diver)
+	if err != nil {
+		log.Print(err)
+	}
+
+	reader := bytes.NewReader(md)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://"+addr+"/connect", reader)
 	if err != nil {
 		log.Print(err)
 		return err
