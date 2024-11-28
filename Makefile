@@ -24,7 +24,7 @@ start: build
 	./bin/$(BIN_NAME) &
 
 # Docker сборка
-docker-build: build
+docker-build: 
 	docker build -t $(DOCKER_IMAGE_NAME) .
 
 # Запуск проекта в Docker контейнере с использованием .env файла

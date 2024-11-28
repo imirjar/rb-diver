@@ -38,6 +38,7 @@ func Run(ctx context.Context) error {
 
 			Michman: cfg.Michman,
 		}
+
 		err := srv.Registrate(ctx, diver)
 		if err != nil {
 			log.Print(err)
