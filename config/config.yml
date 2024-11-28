@@ -1,4 +1,6 @@
 michman: "spo-dev:7224"
-port: "8080"
+name: "MyLovelyMac"
+addr: "localhost"
+port: "7071"
 secret: "haslo"
 db: "postgres://postgres:postgres@localhost:5432/divers_target?sslmode=disable"

@@ -2,38 +2,30 @@ package reports
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"log"
-	"time"
 
 	"github.com/imirjar/rb-diver/internal/models"
 	_ "modernc.org/sqlite"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ReportsStore struct {
-	dbConn *sql.Conn
+	mongoClient *mongo.Client
 }
 
 func New() *ReportsStore {
 
-	db, err := sql.Open("sqlite", "db/reports")
+	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://root:example@localhost:27017"))
 	if err != nil {
-		// if err.Error() == "" {
-		// 	log.Print(err.Error())
-		// }
-		log.Println("-1->", err.Error(), "<--")
-		// panic(err)
-	}
-
-	conn, err := db.Conn(context.Background())
-	if err != nil {
-		log.Println("-2->", err.Error(), "<--")
-		panic(err)
+		log.Fatal(err)
 	}
 
 	store := ReportsStore{
-		dbConn: conn,
+		mongoClient: mongoClient,
 	}
 
 	// if err := store.Ping(); err != nil {
@@ -44,22 +36,34 @@ func New() *ReportsStore {
 }
 
 func (r *ReportsStore) Ping() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-	return r.dbConn.PingContext(ctx)
+	return nil
 }
+
+// func (r *ReportsStore) GetQuery(ctx context.Context, id string) (string, error) {
+
+// 	var data string
+
+// 	row := r.dbConn.QueryRowContext(ctx, "SELECT query FROM reports WHERE id=$1;", id)
+// 	err := row.Scan(&data)
+// 	if err != nil {
+// 		return err.Error(), err
+// 	}
+
+// 	return data, nil
+// }
 
 func (r *ReportsStore) GetQuery(ctx context.Context, id string) (string, error) {
 
-	var data string
+	collection := r.mongoClient.Database("reports").Collection("reports")
+	filter := bson.D{{"_id", id}}
 
-	row := r.dbConn.QueryRowContext(ctx, "SELECT query FROM reports WHERE id=$1;", id)
-	err := row.Scan(&data)
-	if err != nil {
+	report := models.Report{}
+
+	if err := collection.FindOne(ctx, filter).Decode(&report); err != nil {
 		return err.Error(), err
 	}
 
-	return data, nil
+	return report.Query, nil
 }
 
 func (r *ReportsStore) GetAllReports(ctx context.Context) (string, error) {

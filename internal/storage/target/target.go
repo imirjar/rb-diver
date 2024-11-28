@@ -17,18 +17,18 @@ type TargetDB struct {
 }
 
 func New(ctx context.Context, dbConn string) *TargetDB {
-	if ping(dbConn) {
-		pool, err := pgxpool.New(ctx, dbConn)
-		if err != nil {
-			panic(err)
-		}
-		return &TargetDB{
-			pool: pool,
-		}
-	} else {
-		log.Print(dbConn)
-		panic("YOU CAN'T RUN DIVER WITHOUT DB CONNECTION!!!")
+	// if ping(dbConn) {
+	pool, err := pgxpool.New(ctx, dbConn)
+	if err != nil {
+		panic(err)
 	}
+	return &TargetDB{
+		pool: pool,
+	}
+	// } else {
+	// 	log.Print(dbConn)
+	// 	panic("YOU CAN'T RUN DIVER WITHOUT DB CONNECTION!!!")
+	// }
 
 }
 

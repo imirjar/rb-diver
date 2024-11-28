@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/imirjar/rb-diver/internal/gateway/http"
+	"github.com/imirjar/rb-diver/internal/models"
 	"github.com/imirjar/rb-diver/internal/service"
 	"github.com/imirjar/rb-diver/internal/storage"
 
@@ -30,7 +31,14 @@ func Run(ctx context.Context) error {
 	done := make(chan bool)
 	go func() {
 		// registration in Michman
-		err := srv.Registrate(ctx, cfg.Michman)
+		diver := models.Diver{
+			Name: cfg.Name,
+			Addr: cfg.Addr,
+			Port: cfg.Port,
+
+			Michman: cfg.Michman,
+		}
+		err := srv.Registrate(ctx, diver)
 		if err != nil {
 			log.Print(err)
 			done <- true

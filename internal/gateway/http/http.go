@@ -30,7 +30,7 @@ func New() *HTTP {
 	}
 }
 
-func (gw *HTTP) Start(ctx context.Context, addr string, michman string) error {
+func (gw *HTTP) Start(ctx context.Context, addr, michman string) error {
 	router := chi.NewRouter()
 
 	router.Get("/", gw.Info)
@@ -50,13 +50,8 @@ func (gw *HTTP) Start(ctx context.Context, addr string, michman string) error {
 	return srv.ListenAndServe()
 }
 
-func (gw *HTTP) Registrate(ctx context.Context, addr string) error {
+func (gw *HTTP) Registrate(ctx context.Context, diver models.Diver) error {
 	log.Print("Michman!!! I'm here! Under the water!")
-
-	diver := models.Diver{
-		Name: "MyMac",
-		IP:   "192.168.0.1",
-	}
 
 	md, err := json.Marshal(diver)
 	if err != nil {
@@ -65,12 +60,14 @@ func (gw *HTTP) Registrate(ctx context.Context, addr string) error {
 
 	reader := bytes.NewReader(md)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://"+addr+"/connect", reader)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://"+diver.Michman+"/connect", reader)
 	if err != nil {
 		log.Print(err)
 		return err
 	}
-	req.Header.Add("X-Real-IP", addr)
+
+	log.Println(diver.Addr)
+	req.Header.Add("X-Real-IP", diver.Addr)
 	status, err := gw.client.POST(req)
 	if err != nil {
 		log.Print(err)
