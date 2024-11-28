@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/imirjar/rb-diver/internal/gateway/http"
@@ -33,7 +34,7 @@ func Run(ctx context.Context) error {
 		// registration in Michman
 		diver := models.Diver{
 			Name: cfg.Name,
-			Addr: cfg.Addr,
+			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
 			Port: cfg.Port,
 
 			Michman: cfg.Michman,
