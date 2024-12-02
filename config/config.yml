@@ -1,4 +1,5 @@
-michman: "spo-dev:7224"
+# michman: "spo-dev:7224"
+michman: "localhost:9090"
 name: "MyLovelyMac"
 addr: "localhost"
 port: "7071"
