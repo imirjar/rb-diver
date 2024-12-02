@@ -13,3 +13,8 @@ type Diver struct {
 	Port    string `json:"port"`
 	Michman string `json:"michman"`
 }
+
+type Data struct {
+	Columns []string `json:"columns"`
+	Values  [][]any  `json:"values"`
+}

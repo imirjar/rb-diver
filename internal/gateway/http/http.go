@@ -14,7 +14,7 @@ import (
 )
 
 type Service interface {
-	Execute(ctx context.Context, id string) ([]map[string]interface{}, error)
+	Execute(ctx context.Context, id string) (models.Data, error)
 	ReportsList(ctx context.Context) (string, error)
 }
 
