@@ -44,7 +44,11 @@ func (t *TargetDB) ExecuteQuery(ctx context.Context, query string) (models.Data,
 	fieldDescriptions := rows.FieldDescriptions()
 
 	columns := make([]string, len(fieldDescriptions))
-	valueRows := make([][]any, len(columns))
+	var valueRows = [][]any{}
+
+	for _, v := range fieldDescriptions {
+		columns = append(columns, v.Name)
+	}
 
 	for rows.Next() {
 		values, err := rows.Values()
