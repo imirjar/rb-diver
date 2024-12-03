@@ -19,6 +19,7 @@ type ReportsStore interface {
 
 type Target interface {
 	ExecuteQuery(ctx context.Context, query string) (models.Data, error)
+	ExecuteQueryMap(ctx context.Context, query string) ([]map[string]interface{}, error)
 }
 
 type Storage struct {
