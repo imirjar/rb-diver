@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/imirjar/rb-diver/internal/models"
-	"github.com/imirjar/rb-diver/internal/storage/reports"
+	"github.com/imirjar/rb-diver/internal/storage/self"
 	"github.com/imirjar/rb-diver/internal/storage/target"
 )
 
@@ -12,24 +12,27 @@ type Config interface {
 	GetDiverTargetDB() string
 }
 
-type ReportsStore interface {
-	GetQuery(ctx context.Context, id string) (string, error)
-	GetAllReports(ctx context.Context) (string, error)
+type SelfStore interface {
+	GetReport(context.Context, string) (models.Report, error)
+	GetReports(context.Context) ([]models.Report, error)
+	GetReportsByRole(context.Context, []string) ([]models.Report, error)
+
+	GetRoles(context.Context) ([]models.Role, error)
+	GetRolesByReportID(context.Context, string) ([]models.Role, error)
 }
 
-type Target interface {
-	ExecuteQuery(ctx context.Context, query string) (models.Data, error)
-	ExecuteQueryMap(ctx context.Context, query string) ([]map[string]interface{}, error)
+type TargetStore interface {
+	ExecuteReport(ctx context.Context, query string) (models.Data, error)
 }
 
 type Storage struct {
-	ReportsStore
-	Target
+	SelfStore
+	TargetStore
 }
 
 func New(conn string) *Storage {
 	return &Storage{
-		ReportsStore: reports.New(),
-		Target:       target.New(context.Background(), conn),
+		SelfStore:   self.New(),
+		TargetStore: target.New(context.Background(), conn),
 	}
 }
