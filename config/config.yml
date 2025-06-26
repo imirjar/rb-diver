@@ -1,0 +1,4 @@
+port: "7070"
+db: "postgres://login:password@address:5432/db?sslmode=disable"
+mongo: mongodb://login:password@address/db
+rabbit: amqp://login:password@address:5672
