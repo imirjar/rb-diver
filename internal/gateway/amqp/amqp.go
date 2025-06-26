@@ -2,7 +2,6 @@ package amqp
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 
 	"github.com/imirjar/rb-diver/internal/models"
@@ -23,24 +22,33 @@ func New() *AMQP {
 	return &AMQP{}
 }
 
-func (a *AMQP) Start(ctx context.Context, connection string) error {
-
-	// 1. Подключение к RabbitMQ
+func (a *AMQP) Connect(ctx context.Context, connection string) error {
 	conn, err := amqp.Dial(connection)
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
+		return err
 	}
-	defer conn.Close()
+	a.Conn = conn
 
-	// 2. Создание канала
-	ch, err := conn.Channel()
+	ch, err := a.Conn.Channel()
 	if err != nil {
 		log.Fatalf("Failed to create channel: %v", err)
 	}
-	defer ch.Close()
+
+	a.Chan = ch
+
+	return nil
+}
+
+func (a *AMQP) Disconnect() error {
+	defer a.Conn.Close()
+	return a.Chan.Close()
+}
+
+func (a *AMQP) Start(ctx context.Context, connection string) error {
 
 	// 3. Объявление очереди
-	_, err = ch.QueueDeclare(
+	_, err := a.Chan.QueueDeclare(
 		"data_queue", // name
 		true,         // durable
 		false,        // delete when unused
@@ -53,7 +61,7 @@ func (a *AMQP) Start(ctx context.Context, connection string) error {
 	}
 
 	// 4. Подписка на сообщения
-	msgs, err := ch.Consume(
+	msgs, err := a.Chan.Consume(
 		"data_queue", // queue
 		"",           // consumer
 		true,         // auto-ack
@@ -70,47 +78,8 @@ func (a *AMQP) Start(ctx context.Context, connection string) error {
 
 	// 5. Обработка сообщений
 	for msg := range msgs {
-		a.processMessage(ctx, ch, msg)
+		a.processMessage(ctx, a.Chan, msg)
 	}
 
 	return err
-}
-
-func (a *AMQP) processMessage(ctx context.Context, ch *amqp.Channel, msg amqp.Delivery) {
-	// 1. Парсим запрос
-	reportID := string(msg.Body)
-	log.Printf("📥 Received request for report: %s", reportID)
-
-	// 2. Формируем данные (ваша бизнес-логика)
-	data, err := a.Service.ReportExecute(ctx, reportID)
-	// data.ID = reportID
-	if err != nil {
-		log.Print(data)
-		return
-	}
-
-	// 3. Сериализуем в JSON
-	response, err := json.Marshal(data)
-	if err != nil {
-		log.Printf("❌ Failed to marshal data: %v", err)
-		return
-	}
-
-	// 4. Отправляем ответ
-	err = ch.Publish(
-		"",          // exchange
-		msg.ReplyTo, // routing key
-		false,       // mandatory
-		false,       // immediate
-		amqp.Publishing{
-			ContentType:   "application/json",
-			Body:          response,
-			CorrelationId: msg.CorrelationId,
-		},
-	)
-	if err != nil {
-		log.Printf("❌ Failed to send response: %v", err)
-	} else {
-		log.Printf("📤 Sent response for report %s", reportID)
-	}
 }

@@ -43,13 +43,16 @@ func Run(ctx context.Context) error {
 	srv.Service = svc
 
 	amqpServer := amqp.New()
+	amqpServer.Connect(ctx, cfg.Rabbit)
+	defer amqpServer.Disconnect()
+
 	amqpServer.Service = svc
 
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
 		// Start HTTP server
-		if err := srv.Start(ctx, cfg.Port, cfg.Michman); err != nil {
+		if err := srv.Start(ctx, cfg.Port); err != nil {
 			log.Printf("HTTP server error: %v", err)
 			return err
 		}

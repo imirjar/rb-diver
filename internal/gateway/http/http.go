@@ -22,7 +22,7 @@ func New() *HTTP {
 
 }
 
-func (gw *HTTP) Start(ctx context.Context, addr, michman string) error {
+func (gw *HTTP) Start(ctx context.Context, addr string) error {
 
 	gw.router.Get("/", gw.Info)
 
