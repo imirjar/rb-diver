@@ -1,4 +1,0 @@
-port: "7070"
-db: "postgres://postgres:postgres@0.0.0.0:5432/divers_target?sslmode=disable"
-mongo: mongodb://imirjar:W6SgTpAcrTjJ41EX7NLYn7oE@db.sleaf.dev/PoliglotimCourses
-rabbit: amqp://imirjar:M390v-21@77.232.132.110:5672
