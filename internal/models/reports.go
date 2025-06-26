@@ -1,7 +1,7 @@
 package models
 
 type Report struct {
-	Id          string `json:"id"`
+	Id          string `json:"id" bson:"_id"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 
@@ -14,6 +14,7 @@ type Report struct {
 }
 
 type Data struct {
+	ID      string   `json:"id"`
 	Columns []string `json:"columns"`
 	Values  [][]any  `json:"values"`
 }

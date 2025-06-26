@@ -18,6 +18,9 @@ type Config struct {
 	Michman string `yaml:"michman" env:"MICHMAN"`
 
 	DB string `yaml:"db" env:"DB"`
+
+	Mongo  string `yaml:"mongo" env:"MONGO"`
+	Rabbit string `yaml:"rabbit" env:"RABBIT"`
 }
 
 func New() *Config {

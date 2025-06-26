@@ -11,30 +11,9 @@ import (
 )
 
 type Service interface {
-	ReportInfo(context.Context, string) (models.Report, error)
 	ReportExecute(context.Context, string) (models.Data, error)
 	ReportsList(context.Context, []string) ([]models.Report, error)
-	RoleList(context.Context, string) ([]models.Role, error)
-}
-
-// Use divers reports query fild as sql request in db
-func (gw *HTTP) GetReport(w http.ResponseWriter, r *http.Request) {
-	reportID := chi.URLParam(r, "id")
-
-	result, err := gw.Service.ReportInfo(context.Background(), reportID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.Header().Set("content-type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(&result); err != nil {
-		log.Println("HANDLER ExecuteHandler Encode ERROR", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
+	// RoleList(context.Context, string) ([]models.Role, error)
 }
 
 // Use divers reports query fild as sql request in db
@@ -78,45 +57,27 @@ func (gw *HTTP) ReportsList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ReportList consist of all diver reports
-func (gw *HTTP) RoleList(w http.ResponseWriter, r *http.Request) {
-	reportID := r.URL.Query().Get("report_id")
+// // ReportList consist of all diver reports
+// func (gw *HTTP) RoleList(w http.ResponseWriter, r *http.Request) {
+// 	reportID := r.URL.Query().Get("report_id")
 
-	result, err := gw.Service.RoleList(r.Context(), reportID)
-	if err != nil {
-		log.Println("HANDLER service ReportList ERROR", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+// 	result, err := gw.Service.RoleList(r.Context(), reportID)
+// 	if err != nil {
+// 		log.Println("HANDLER service ReportList ERROR", err)
+// 		http.Error(w, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
 
-	w.Header().Set("content-type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(&result); err != nil {
-		log.Println("HANDLER ExecuteHandler Encode ERROR", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
+// 	w.Header().Set("content-type", "application/json; charset=utf-8")
+// 	w.WriteHeader(http.StatusOK)
+// 	if err = json.NewEncoder(w).Encode(&result); err != nil {
+// 		log.Println("HANDLER ExecuteHandler Encode ERROR", err)
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+// }
 
 func (gw *HTTP) Info(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Hello! I,m a diver."))
-}
-
-func (gw *HTTP) CheckConnection(w http.ResponseWriter, r *http.Request) {
-	// registration in Michman
-	// diver := models.Diver{
-	// 	// Name: cfg.Name,
-	// 	Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
-	// 	// Port: cfg.Port,
-
-	// 	// Michman: cfg.Michman,
-	// }
-	// w.Header().Set("content-type", "application/json")
-	// w.WriteHeader(http.StatusOK)
-	// if err = json.NewEncoder(w).Encode(&diver); err != nil {
-	// 	log.Println("HANDLER ExecuteHandler Encode ERROR", err)
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
 }

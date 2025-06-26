@@ -26,19 +26,17 @@ func (gw *HTTP) Start(ctx context.Context, addr, michman string) error {
 
 	gw.router.Get("/", gw.Info)
 
-	gw.router.Route("/roles", func(roles chi.Router) {
-		roles.Get("/", gw.RoleList)
-	})
+	// gw.router.Route("/roles", func(roles chi.Router) {
+	// 	roles.Get("/", gw.RoleList)
+	// })
 
 	gw.router.Route("/reports", func(reports chi.Router) {
-		reports.Get("/{id}", gw.GetReport)
 		// reports.Get("/has_role", gw.GetReport)
 		reports.Post("/{id}", gw.ReportExecute)
 		// reports.Put("/{id}", gw.ReportUpdate)
 		reports.Get("/", gw.ReportsList)
 	})
 
-	gw.router.Get("/check_conn", gw.CheckConnection)
 	//for new usecases add new route
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", addr),

@@ -17,29 +17,37 @@ type TargetDB struct {
 	pool *pgxpool.Pool
 }
 
-func New(ctx context.Context, dbConn string) *TargetDB {
-	// if ping(dbConn) {
+func New() *TargetDB {
+	return &TargetDB{}
+}
+
+func (t *TargetDB) Connect(ctx context.Context, dbConn string) error {
 	pool, err := pgxpool.New(ctx, dbConn)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	return &TargetDB{
-		pool: pool,
-	}
-	// } else {
-	// 	log.Print(dbConn)
-	// 	panic("YOU CAN'T RUN DIVER WITHOUT DB CONNECTION!!!")
-	// }
 
+	if err = pool.Ping(ctx); err != nil {
+		log.Println("Внимание! Подключение к базе данных отсутствует!")
+		return err
+	}
+	t.pool = pool
+
+	return nil
+}
+
+func (t *TargetDB) Disconnect() {
+	t.pool.Close()
 }
 
 // Execute selected report tranform report data to models.Data
 func (t *TargetDB) ExecuteReport(ctx context.Context, query string) (models.Data, error) {
 
+	log.Print(query)
 	// DB request
 	rows, err := t.pool.Query(ctx, query)
 	if err != nil {
-		log.Print(err)
+		log.Printf("query %s with err %s", query, err)
 		return models.Data{}, err
 	}
 
@@ -57,6 +65,7 @@ func (t *TargetDB) ExecuteReport(ctx context.Context, query string) (models.Data
 	for rows.Next() {
 		values, err := rows.Values()
 		if err != nil {
+			log.Print("EOF!!!!!")
 			return models.Data{}, err
 		}
 		valueRows = append(valueRows, values)
@@ -68,42 +77,5 @@ func (t *TargetDB) ExecuteReport(ctx context.Context, query string) (models.Data
 		Values:  valueRows,
 	}
 
-	// Получаем имена колонок
-	// fieldDescriptions := rows.FieldDescriptions()
-	// columns := make([]string, len(fieldDescriptions))
-	// for i, fd := range fieldDescriptions {
-	// 	columns[i] = string(fd.Name)
-	// }
-
-	// var results []map[string]interface{}
-	// for rows.Next() {
-	// 	values, err := rows.Values()
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	// Создаем динамическую запись
-	// 	record := make(map[string]interface{})
-	// 	for i, col := range columns {
-	// 		record[col] = values[i]
-	// 	}
-	// 	results = append(results, record)
-	// }
-	// log.Print(results)
 	return results, nil
-}
-
-func ping(conn string) bool {
-	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, conn)
-	if err != nil {
-		log.Print(err.Error())
-		return false
-	}
-	if err = pool.Ping(ctx); err != nil {
-		log.Println("Внимание! Подключение к базе данных отсутствует!")
-		return false
-	} else {
-		return true
-	}
 }

@@ -4,11 +4,14 @@ import (
 	"context"
 	"log"
 
+	"github.com/imirjar/rb-diver/internal/gateway/amqp"
 	"github.com/imirjar/rb-diver/internal/gateway/http"
 	"github.com/imirjar/rb-diver/internal/service"
-	"github.com/imirjar/rb-diver/internal/storage"
+	"github.com/imirjar/rb-diver/internal/storage/reports"
+	"github.com/imirjar/rb-diver/internal/storage/target"
 
 	"github.com/imirjar/rb-diver/config"
+	"golang.org/x/sync/errgroup"
 )
 
 // Run app
@@ -16,29 +19,52 @@ func Run(ctx context.Context) error {
 	cfg := config.New()
 
 	// Create storage layer for data
-	storage := storage.New(cfg.DB)
+	targetStorage := target.New()
+	err := targetStorage.Connect(ctx, cfg.DB)
+	if err != nil {
+		return err
+	}
+	defer targetStorage.Disconnect()
+
+	rs := reports.New()
+	err = rs.Connect(ctx, cfg.Mongo)
+	if err != nil {
+		return err
+	}
+	defer rs.Disconnect()
 
 	// Create service layer for app logic
-	service := service.New()
-	service.Storage = storage
+	svc := service.New()
+	svc.Storage = targetStorage
+	svc.RS = rs
 
 	// Create HTTP server to serv http requests
 	srv := http.New()
-	srv.Service = service
+	srv.Service = svc
 
-	// Waiting for srv.Start's ending
-	done := make(chan bool)
-	go func() {
+	amqpServer := amqp.New()
+	amqpServer.Service = svc
 
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		// Start HTTP server
-		err := srv.Start(ctx, cfg.Port, cfg.Michman)
-		if err != nil {
-			log.Print(err)
+		if err := srv.Start(ctx, cfg.Port, cfg.Michman); err != nil {
+			log.Printf("HTTP server error: %v", err)
+			return err
 		}
+		return nil
+	})
 
-		done <- true
-	}()
+	g.Go(func() error {
+		// Start AMQP server
+		if err := amqpServer.Start(ctx, cfg.Rabbit); err != nil {
+			log.Printf("AMQP server error: %v", err)
+			return err
+		}
+		return nil
+	})
 
-	<-done
-	return nil
+	// Wait for all servers to finish or one to error
+	return g.Wait()
 }
