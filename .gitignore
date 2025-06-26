@@ -1,6 +1,6 @@
 # config files
-config/*.yml
-.env
+config/config.yml
+*.env
 
 # keys
 /keys
